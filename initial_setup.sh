@@ -6,7 +6,7 @@ cprint() {
   local text=$1
   local RESET='\e[0m'
 
-  echo "${color}${text}${RESET}"
+  echo -e "${color}${text}${RESET}"
 }
 
 read -p "Please enter your username for Git setup: " user_name
@@ -39,7 +39,7 @@ sudo apt install -y htop
 
 #Docker setup
 cprint "Installing Docker"
-sudo apt install apt-transport-https ca-certificates curl software-properties-common
+sudo apt install -y apt-transport-https ca-certificates curl software-properties-common
 sudo apt install -y docker-ce
 sudo usermod -aG docker $USER
 
