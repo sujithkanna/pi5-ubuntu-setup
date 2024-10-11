@@ -19,7 +19,7 @@ sudo apt update
 cprint "Installing zsh"
 sudo apt install -y zsh
 cprint "Installing OhMyZsh"
-sh -c "$(wget https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh -O -)"
+sh -c "$(wget https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh -O -)" --skip-chsh #Skip is to skip auto switch terminal from bash to zsh
 
 
 #Chrome
@@ -41,15 +41,21 @@ sudo apt install -y htop
 #Docker setup
 cprint "Installing Docker"
 sudo apt install -y apt-transport-https ca-certificates curl software-properties-common
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+echo "deb [arch=arm64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list
+sudo apt update
 sudo apt install -y docker-ce
 sudo usermod -aG docker $USER
+sudo systemctl start docker
+sudo systemctl enable docker
 
 #Go lang (Required for LazyGit and LazyDocker)
 cprint "Installing Go"
 sudo apt install -y golang-go
+cprint "Setting go path to bashrc"
 echo 'export PATH=$PATH:$(go env GOPATH)/bin' >> ~/.bashrc
+cprint "Setting go path to zshrc"
 echo 'export PATH=$PATH:$(go env GOPATH)/bin' >> ~/.zshrc
-source ~/.zshrc
 
 #LazyDocker
 cprint "Installing LazyDocker"
@@ -61,14 +67,14 @@ sudo apt install -y git
 git config --global user.email "$email_address"
 git config --global user.name "$user_name"
 
-cprint "Setting up SSH github"
-KEY_PATH="~/.ssh/id_ed25519"
+KEY_PATH="$HOME/.ssh/id_ed25519"
 if [[ ! -f "$KEY_PATH" ]]; then
     # Generate the SSH key if it does not exist
+    cprint "Creating ssh for email $email_address"
     ssh-keygen -t ed25519 -C "$email_address" -N "" -f "$KEY_PATH"
-    echo "SSH key generated at $KEY_PATH."
+    cprint "SSH key generated at $KEY_PATH."
 else
-    echo "SSH key already exists at $KEY_PATH."
+    cprint "SSH key already exists at $KEY_PATH."
 fi
 eval "$(ssh-agent -s)"
 ssh-add "$KEY_PATH"
@@ -118,3 +124,5 @@ echo "$ip_configuration" | sudo tee /etc/systemd/network/10-static-en.network > 
 
 sudo systemctl enable systemd-networkd
 sudo systemctl start systemd-networkd
+
+zsh
