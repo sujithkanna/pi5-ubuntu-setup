@@ -15,6 +15,12 @@ read -p "Please enter your email for Git setup: " email_address
 
 sudo apt update
 
+#Git
+cprint "Installing Git"
+sudo apt install -y git
+git config --global user.email "$email_address"
+git config --global user.name "$user_name"
+
 #Install zsh
 cprint "Installing zsh"
 sudo apt install -y zsh
@@ -61,12 +67,6 @@ echo 'export PATH=$PATH:$(go env GOPATH)/bin' >> ~/.zshrc
 cprint "Installing LazyDocker"
 go install github.com/jesseduffield/lazydocker@latest
 
-#Git
-cprint "Installing Git"
-sudo apt install -y git
-git config --global user.email "$email_address"
-git config --global user.name "$user_name"
-
 KEY_PATH="$HOME/.ssh/id_ed25519"
 if [[ ! -f "$KEY_PATH" ]]; then
     # Generate the SSH key if it does not exist
@@ -78,10 +78,6 @@ else
 fi
 eval "$(ssh-agent -s)"
 ssh-add "$KEY_PATH"
-cprint "####################"
-cprint "Copy the  following hash code and add it to Github"
-cat ~/.ssh/id_ed25519.pub
-cprint "####################"
 
 
 #Lazy git
@@ -125,4 +121,9 @@ echo "$ip_configuration" | sudo tee /etc/systemd/network/10-static-en.network > 
 sudo systemctl enable systemd-networkd
 sudo systemctl start systemd-networkd
 
-zsh
+cprint "####################"
+cprint "Copy the  following hash code and add it to Github"
+cat ~/.ssh/id_ed25519.pub
+cprint "####################"
+
+chsh -s $(which zsh)
