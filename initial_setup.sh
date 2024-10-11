@@ -61,7 +61,7 @@ git config --global user.email "$email_address"
 git config --global user.name "$user_name"
 
 cprint "Setting up SSH github"
-KEY_PATH="$HOME/.ssh/id_ed25519"
+KEY_PATH="~/.ssh/id_ed25519"
 if [[ ! -f "$KEY_PATH" ]]; then
     # Generate the SSH key if it does not exist
     ssh-keygen -t ed25519 -C "$email_address" -N "" -f "$KEY_PATH"
