@@ -25,8 +25,9 @@ git config --global user.name "$user_name"
 cprint "Installing zsh"
 sudo apt install -y zsh
 cprint "Installing OhMyZsh"
-sh -c "$(wget https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh -O -)" --unattended --skip-chsh #Skip is to skip auto switch terminal from bash to zsh
-
+wget https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh -O install.sh
+sh install.sh --unattended --skip-chsh
+rm install.sh
 
 #Chrome
 cprint  "Installing Chrome"
@@ -127,3 +128,4 @@ cat ~/.ssh/id_ed25519.pub
 cprint "####################"
 
 chsh -s $(which zsh)
+zsh
