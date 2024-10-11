@@ -19,7 +19,8 @@ sudo apt update
 cprint "Installing zsh"
 sudo apt install -y zsh
 cprint "Installing OhMyZsh"
-sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+sh -c "$(wget https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh -O -)"
+
 
 #Chrome
 cprint  "Installing Chrome"
