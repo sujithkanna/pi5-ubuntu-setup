@@ -10,10 +10,7 @@ def run_command(command, cwd=None):
     """Runs a Bash command and prints the output."""
     try:
         print(f"Executing command: {command}")
-        result = subprocess.run(command, shell=True, check=True, text=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=cwd)
-        print(result.stdout)
-        if result.stderr:
-            print(result.stderr)
+        subprocess.run(command, shell=True, check=True, text=True, cwd=cwd)
     except subprocess.CalledProcessError as e:
         print(f"Command failed with error: {e.stderr}")
     except Exception as e:
@@ -38,8 +35,8 @@ def build_docker_image(dockerfile_dir, image_name):
     run_command(command)
 
 def run_docker_compose(clone_dir):
-    """Runs docker-compose up in the cloned directory."""
-    command = "docker-compose up -d"
+    """Runs docker compose up in the cloned directory."""
+    command = "docker compose up -d"
     run_command(command, cwd=clone_dir)  # Run the docker-compose up command in the last cloned repo directory
 
 def main():
