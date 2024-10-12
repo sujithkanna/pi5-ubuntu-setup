@@ -29,6 +29,10 @@ wget https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh -
 sh install.sh --unattended --skip-chsh
 rm install.sh
 
+#Python
+cprint  "Installing python3"
+sudo apt install python3
+
 #Chrome
 cprint  "Installing Chrome"
 sudo apt install -y chromium-browser
