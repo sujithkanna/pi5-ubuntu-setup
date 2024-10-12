@@ -5,5 +5,5 @@ wget -O initial_setup.sh https://raw.githubusercontent.com/sujithkanna/pi5-ubunt
 
 Run the following script to setup docker
 ```bash
-wget -O- https://raw.githubusercontent.com/sujithkanna/pi5-ubuntu-setup/refs/heads/main/docker_setup.sh | sudo bash
+wget -O- https://raw.githubusercontent.com/sujithkanna/pi5-ubuntu-setup/refs/heads/main/docker_setup.py | python3
 ```
