@@ -139,8 +139,8 @@ cat "$KEY_PATH.pub"
 cprint "####################"
 
 cprint  "Creating docker users"
-sudo groupadd dockergroup
-sudo useradd -r -s /bin/false -g dockergroup dockeruser
+sudo usermod -aG docker $(whoami)
+newgrp docker
 
 chsh -s $(which zsh)
 zsh
