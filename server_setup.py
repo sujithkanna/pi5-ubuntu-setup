@@ -103,7 +103,7 @@ def create_nginx_configs_and_env(data, project_directory, password):
         
         if host and port:
             config = template.render(domain_name=host, port=port)
-            config_file = f"{NGINX_CONFIG_PATH}{host}.conf"
+            config_file = f"{NGINX_CONFIG_PATH}/{host}.conf"
             local_config_file = f"{project_directory}/{host}.conf"
         
             create_certificate(host)
