@@ -2,6 +2,7 @@ import os
 import yaml
 import subprocess
 from jinja2 import Template
+import getpass
 
 REPO_TO_IMAGE = {
     'git@github.com:sujithkanna/docker-qbittorrent.git': 'hsalf-qbittorrent:latest'
@@ -38,7 +39,6 @@ server {
     }
 }
 """
-
 def run_command(command, cwd=None):
     """Runs a Bash command and prints the output."""
     try:
@@ -48,6 +48,10 @@ def run_command(command, cwd=None):
         print(f"Command failed with error: {e.stderr}")
     except Exception as e:
         print(f"Error: {e}")
+
+def run_command_with_sudo(command, password, cwd=None):
+    """Run command with sudo to handle permission issues."""
+    run_command(f"echo '{password}' | sudo -S {command}", cwd)
 
 def clone_repo(repo_url):
     """Clones the GitHub repository into the current directory."""
@@ -89,7 +93,7 @@ def delete_and_create_env_file(env_file_path):
         os.remove(env_file_path)
         print(f"{env_file_path} has been cleared.")
 
-def create_nginx_configs_and_env(data, project_directory):
+def create_nginx_configs_and_env(data, project_directory, password):
     """Creates Nginx config files and a fresh .env file."""
     env_file_path = os.path.join(project_directory, '.env')
     delete_and_create_env_file(env_file_path)
@@ -104,9 +108,8 @@ def create_nginx_configs_and_env(data, project_directory):
             config = template.render(domain_name=host, port=port)
             config_file = f"/etc/nginx/sites-available/{host}"
             create_certificate(host)
-            with open(config_file, "w") as f:
-                f.write(config)
-                create_symlink(config_file_path=config_file)
+            run_command_with_sudo(f"rm {password}")
+            run_command_with_sudo(f"echo '{config}' > {config_file}", password)
             with open(env_file_path, "a") as e:
                 e.write(f"{service.upper()}_PORT={port}\n")
 
@@ -116,6 +119,8 @@ def create_nginx_configs_and_env(data, project_directory):
     print(f"All Nginx configurations and .env file have been created at {project_directory}")
 
 def main():
+    password = getpass.getpass("Enter your sudo password: ")
+
     for repo_url, image_name in REPO_TO_IMAGE.items():
         clone_dir = clone_repo(repo_url)
         build_docker_image(clone_dir, image_name)
@@ -127,7 +132,7 @@ def main():
     with open(os.path.join(cloned_dir, "nginx.yaml"), 'r') as file:
         data = yaml.safe_load(file)
 
-    create_nginx_configs_and_env(data, cloned_dir)
+    create_nginx_configs_and_env(data, cloned_dir, password)
 
     run_command("docker compose up -d", cloned_dir)
     run_command("sudo systemctl start nginx")
