@@ -67,7 +67,7 @@ def build_docker_image(dockerfile_dir, image_name):
 def create_certificate(host):
     """Create an SSL certificate for the given host."""
     print(f"Creating certificate for {host}...")
-    certbot_command = f"sudo certbot certonly --standalone --preferred-challenges http -d {host}"
+    certbot_command = f"sudo certbot certonly --standalone --preferred-challenges http -d {host} --email sujith.niraikulathan@gmail.com --agree-tos"
     run_command(certbot_command)
 
 def create_symlink(config_file_path, sites_enabled_directory="/etc/nginx/sites-enabled"):
