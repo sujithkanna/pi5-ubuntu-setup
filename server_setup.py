@@ -146,6 +146,7 @@ def main():
 
     run_command("docker compose up -d", cloned_dir)
     run_command("sudo systemctl start nginx")
+    run_command(f"rm -rf {WORKING_DIRECTORY}")
 
 if __name__ == '__main__':
     main()
