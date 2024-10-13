@@ -79,7 +79,7 @@ echo 'export PATH=$PATH:$(go env GOPATH)/bin' >> ~/.zshrc
 cprint "Installing LazyDocker"
 go install github.com/jesseduffield/lazydocker@latest
 
-KEY_PATH="~/.ssh/id_ed25519"
+KEY_PATH=""$HOME/.ssh/id_ed25519"
 if [[ ! -f "$KEY_PATH" ]]; then
     # Generate the SSH key if it does not exist
     cprint "Creating ssh for email $email_address"
@@ -135,7 +135,7 @@ sudo systemctl start systemd-networkd
 
 cprint "####################"
 cprint "Copy the  following hash code and add it to Github"
-cat ~/.ssh/id_ed25519.pub
+cat "$KEY_PATH.pub"
 cprint "####################"
 
 cprint  "Creating user for docker"
