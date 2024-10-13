@@ -7,6 +7,8 @@ REPO_TO_IMAGE = {
     'git@github.com:sujithkanna/docker-qbittorrent.git': 'hsalf-qbittorrent:latest'
 }
 
+WORKING_DIRECTORY = os.path.join(os.getcwd(), "DockerSetup")
+
 nginx_template = """
 server {
     listen 80;
@@ -49,7 +51,7 @@ def run_command(command, cwd=None):
 
 def clone_repo(repo_url):
     """Clones the GitHub repository into the current directory."""
-    current_dir = os.getcwd()
+    current_dir = WORKING_DIRECTORY
     repo_name = repo_url.split('/')[-1].replace('.git', '')
     clone_dir = os.path.join(current_dir, repo_name)
     
@@ -87,7 +89,7 @@ def delete_and_create_env_file(env_file_path):
         os.remove(env_file_path)
         print(f"{env_file_path} has been cleared.")
 
-def create_nginx_configs_and_env(data, project_directory, template_path):
+def create_nginx_configs_and_env(data, project_directory):
     """Creates Nginx config files and a fresh .env file."""
     env_file_path = os.path.join(project_directory, '.env')
     delete_and_create_env_file(env_file_path)
@@ -122,10 +124,8 @@ def main():
 
     with open(os.path.join(cloned_dir, "nginx.yaml"), 'r') as file:
         data = yaml.safe_load(file)
-
-    template_path = "nginx_template.j2"
-
-    create_nginx_configs_and_env(data, cloned_dir, template_path)
+        
+    create_nginx_configs_and_env(data, cloned_dir)
 
     run_command("docker compose up -d", cloned_dir)
     run_command("sudo systemctl start nginx")
