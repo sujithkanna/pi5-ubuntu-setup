@@ -107,6 +107,8 @@ def create_nginx_configs_and_env(data, project_directory):
             with open(config_file, "w") as f:
                 f.write(config)
                 create_symlink(config_file_path=config_file)
+            with open(env_file_path, "a") as e:
+                e.write(f"{service.upper()}_PORT={port}\n")
 
         else:
             print(f"No host or port found for service {service}")
@@ -124,7 +126,7 @@ def main():
 
     with open(os.path.join(cloned_dir, "nginx.yaml"), 'r') as file:
         data = yaml.safe_load(file)
-        
+
     create_nginx_configs_and_env(data, cloned_dir)
 
     run_command("docker compose up -d", cloned_dir)
