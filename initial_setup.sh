@@ -138,5 +138,9 @@ cprint "Copy the  following hash code and add it to Github"
 cat ~/.ssh/id_ed25519.pub
 cprint "####################"
 
+cprint  "Creating user for docker"
+sudo groupadd dockergroup
+sudo useradd -r -s /bin/false -g dockergroup dockeruser
+
 chsh -s $(which zsh)
 zsh
