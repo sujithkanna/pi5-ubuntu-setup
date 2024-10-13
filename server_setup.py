@@ -1,4 +1,5 @@
 import os
+import sys
 import yaml
 import subprocess
 from jinja2 import Template
@@ -44,19 +45,23 @@ server {
 }
 """
 def run_command(command, cwd=None):
-    """Runs a Bash command and prints the output."""
+    """Runs a Bash command and returns the output."""
     try:
         print(f"Executing command: {command}")
-        subprocess.run(command, shell=True, check=True, text=True, cwd=cwd)
+        result = subprocess.run(command, shell=True, check=True, text=True, capture_output=True, cwd=cwd)
+        return result.stdout.strip()
     except subprocess.CalledProcessError as e:
-        print(f"Command failed with error: {e.stderr}")
+        print(f"Command failed with error: {e.stderr.strip()}")
+        sys.exit(1) 
     except Exception as e:
         print(f"Error: {e}")
+        sys.exit(1) 
 
 def run_command_with_sudo(command, password, cwd=None):
-    """Run command with sudo to handle permission issues."""
+    """Run command with sudo to handle permission issues and returns output."""
     password_escaped = shlex.quote(password)
-    run_command(f"echo '{password_escaped}' | sudo -S {command}", cwd)
+    sudo_command = f"echo {password_escaped} | sudo -S {command}"
+    return run_command(sudo_command, cwd)
 
 def clone_repo(repo_url):
     """Clones the GitHub repository into the current directory."""
@@ -89,12 +94,20 @@ def delete_file(file_path):
         os.remove(file_path)
         print(f"{file_path} has been cleared.")
 
+def setup_docker_user_group(env_file_path):
+    print("Adding docker user to env file")
+    with open(env_file_path, "a") as e:
+        docker_user = run_command("id -u dockeruser")
+        docker_group = run_command("id -g dockeruser")
+        e.write(f"DOCKER_USER={docker_user}\n")
+        e.write(f"DOCKER_GROUP={docker_group}\n")
+
 def create_nginx_configs_and_env(data, project_directory, password):
     """Creates Nginx config files and a fresh .env file."""
     env_file_path = os.path.join(project_directory, '.env')
     delete_file(env_file_path)
     run_command_with_sudo(f"rm -f {NGINX_CONFIG_PATH}/default", password)
-
+    setup_docker_user_group(env_file_path)
     template = Template(nginx_template)
     
     for service, details in data.get('services', {}).items():
@@ -119,6 +132,7 @@ def create_nginx_configs_and_env(data, project_directory, password):
             create_symlink(config_file, password)
 
             with open(env_file_path, "a") as e:
+                print(f"Adding docker port={port} to env file")
                 e.write(f"{service.upper()}_PORT={port}\n")
 
         else:
@@ -146,7 +160,6 @@ def main():
 
     run_command("docker compose up -d", cloned_dir)
     run_command("sudo systemctl start nginx")
-    run_command(f"rm -rf {WORKING_DIRECTORY}")
 
 if __name__ == '__main__':
     main()
