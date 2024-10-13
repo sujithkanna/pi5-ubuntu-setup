@@ -31,7 +31,14 @@ rm install.sh
 
 #Python
 cprint  "Installing python3"
-sudo apt install python3
+sudo apt install -y python3
+sudo apt install -y python3-pip
+sudo apt install -y python3-yaml
+sudo apt install -y python3-jinja2
+
+#Certbot
+cprint "Installing certbot"
+sudo apt install -y certbot python3-certbot-nginx
 
 #Chrome
 cprint  "Installing Chrome"
