@@ -108,7 +108,7 @@ def create_nginx_configs_and_env(data, project_directory, password):
             config = template.render(domain_name=host, port=port)
             config_file = f"/etc/nginx/sites-available/{host}"
             create_certificate(host)
-            run_command_with_sudo(f"rm {password}")
+            run_command_with_sudo(f"rm {config_file}", password)
             run_command_with_sudo(f"echo '{config}' > {config_file}", password)
             with open(env_file_path, "a") as e:
                 e.write(f"{service.upper()}_PORT={port}\n")
