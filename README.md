@@ -11,5 +11,5 @@ wget -O- https://raw.githubusercontent.com/sujithkanna/pi5-ubuntu-setup/refs/hea
 Ensure you have added your local system ssh to github to access private repos required for the below script to complete successfully
 Run the following script to setup docker and nginx server
 ```bash
-wget -O- https://raw.githubusercontent.com/sujithkanna/pi5-ubuntu-setup/refs/heads/main/server_setup.py | sudo python3 server_setup.py && rm server_setup.py
+wget -O- https://raw.githubusercontent.com/sujithkanna/pi5-ubuntu-setup/refs/heads/main/server_setup.py && sudo python3 server_setup.py && rm server_setup.py
 ```
