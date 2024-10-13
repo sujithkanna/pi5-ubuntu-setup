@@ -3,12 +3,16 @@ import yaml
 import subprocess
 from jinja2 import Template
 import getpass
+import shlex
+
 
 REPO_TO_IMAGE = {
     'git@github.com:sujithkanna/docker-qbittorrent.git': 'hsalf-qbittorrent:latest'
 }
 
 WORKING_DIRECTORY = os.path.join(os.getcwd(), "DockerSetup")
+
+NGINX_CONFIG_PATH = "/etc/nginx/sites-available"
 
 nginx_template = """
 server {
@@ -51,7 +55,8 @@ def run_command(command, cwd=None):
 
 def run_command_with_sudo(command, password, cwd=None):
     """Run command with sudo to handle permission issues."""
-    run_command(f"echo '{password}' | sudo -S {command}", cwd)
+    password_escaped = shlex.quote(password)
+    run_command(f"echo '{password_escaped}' | sudo -S {command}", cwd)
 
 def clone_repo(repo_url):
     """Clones the GitHub repository into the current directory."""
@@ -74,29 +79,21 @@ def create_certificate(host):
     certbot_command = f"sudo certbot certonly --standalone --preferred-challenges http -d {host} --email sujith.niraikulathan@gmail.com --agree-tos --non-interactive"
     run_command(certbot_command)
 
-def create_symlink(config_file_path, sites_enabled_directory="/etc/nginx/sites-enabled"):
-    """Create a symlink for the configuration file in the `sites-enabled` directory."""
-    if not os.path.exists(sites_enabled_directory):
-        os.makedirs(sites_enabled_directory)
-
+def create_symlink(config_file_path, password, sites_enabled_directory="/etc/nginx/sites-enabled"):
     symlink_path = os.path.join(sites_enabled_directory, os.path.basename(config_file_path))
-
-    if os.path.exists(symlink_path):
-        os.remove(symlink_path)
-
-    os.symlink(config_file_path, symlink_path)
+    run_command_with_sudo(f"ln -f {config_file_path} {symlink_path}", password)
     print(f"Symlink created at {symlink_path}")
 
-def delete_and_create_env_file(env_file_path):
-    """Delete the .env file if it exists, then create a fresh one."""
-    if os.path.exists(env_file_path):
-        os.remove(env_file_path)
-        print(f"{env_file_path} has been cleared.")
+def delete_file(file_path):
+    if os.path.exists(file_path):
+        os.remove(file_path)
+        print(f"{file_path} has been cleared.")
 
 def create_nginx_configs_and_env(data, project_directory, password):
     """Creates Nginx config files and a fresh .env file."""
     env_file_path = os.path.join(project_directory, '.env')
-    delete_and_create_env_file(env_file_path)
+    delete_file(env_file_path)
+    run_command_with_sudo(f"rm -f {NGINX_CONFIG_PATH}/default", password)
 
     template = Template(nginx_template)
     
@@ -106,10 +103,21 @@ def create_nginx_configs_and_env(data, project_directory, password):
         
         if host and port:
             config = template.render(domain_name=host, port=port)
-            config_file = f"/etc/nginx/sites-available/{host}"
+            config_file = f"{NGINX_CONFIG_PATH}{host}.conf"
+            local_config_file = f"{project_directory}/{host}.conf"
+        
             create_certificate(host)
-            run_command_with_sudo(f"rm {config_file}", password)
-            run_command_with_sudo(f"echo '{config}' | tee {config_file}", password)
+
+            #Clear config files
+            delete_file(local_config_file)
+            run_command_with_sudo(f"rm -f {config_file}", password)
+
+            with open(local_config_file, "w") as f:
+                f.write(config)
+
+            run_command_with_sudo(f"mv {local_config_file} {config_file}", password)
+            create_symlink(config_file, password)
+
             with open(env_file_path, "a") as e:
                 e.write(f"{service.upper()}_PORT={port}\n")
 
@@ -120,6 +128,8 @@ def create_nginx_configs_and_env(data, project_directory, password):
 
 def main():
     password = getpass.getpass("Enter your sudo password: ")
+
+    run_command(f"rm -rf {WORKING_DIRECTORY}")
 
     for repo_url, image_name in REPO_TO_IMAGE.items():
         clone_dir = clone_repo(repo_url)
