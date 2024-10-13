@@ -138,7 +138,7 @@ def create_nginx_configs_and_env(data, project_directory, password):
         else:
             print(f"No host or port found for service {service}")
     
-    print(f"All Nginx configurations and .env file have been created at {project_directory}")
+    print(f"All Nginx configurations and .env file have been created at {env_file_path}")
 
 def main():
     password = getpass.getpass("Enter your sudo password: ")
